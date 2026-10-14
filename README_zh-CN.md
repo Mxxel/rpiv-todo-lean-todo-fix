@@ -9,6 +9,20 @@
 
 基于 [`@juicesharp/rpiv-todo`](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-todo) 的精简封装。在完整保留任务生命周期管理功能的同时，去除冗余的字段说明，显著降低上下文占用。
 
+## 初始化上下文占用对比
+
+<!-- token-benchmark:benchmark:start -->
+单独启用本扩展时，模型可见的常驻初始化上下文如下：
+
+| 版本 | 工具与 Prompt 构成 | 合计 |
+| --- | --- | ---: |
+| Lean `@ssk_dev/rpiv-todo-lean@2.13.9` | `todo` (250) | **250** |
+| 上游 `@juicesharp/rpiv-todo@2.13.8` | `todo` (904) | **904** |
+
+节省 **654 tokens（72.3%）**。
+测量环境为 Pi 1.2.0 的独立临时进程、空白工作目录与空白配置。排除内置工具、Skills、上下文文件、会话历史、用户消息、无关扩展、运行时 UI 与 Slash Commands；计入扩展的 `before_agent_start` 注入。Token 是按 `ceil(字符数 / 4)` 计算的固定字符代理估算，并非模型 tokenizer 实际计费值。
+<!-- token-benchmark:benchmark:end -->
+
 ## 核心特性
 
 * 完整任务管理：支持任务的创建、查询、详情查看、状态更新、删除和清空。
@@ -33,23 +47,9 @@ todo
 
 支持的操作包括 `create`、`list`、`get`、`update`、`delete` 和 `clear`。处理多步骤工作时，先创建任务列表，确保始终只有一个 `in_progress` 任务，并在处理完毕后标记为 `completed`。
 
-## 初始化上下文占用对比
-
-<!-- token-benchmark:benchmark:start -->
-单独启用本扩展时，模型可见的常驻初始化上下文如下：
-
-| 版本 | 工具与 Prompt 构成 | 合计 |
-| --- | --- | ---: |
-| Lean `@ssk_dev/rpiv-todo-lean@2.13.8` | `todo` (250) | **250** |
-| 上游 `@juicesharp/rpiv-todo@2.13.8` | `todo` (904) | **904** |
-
-节省 **654 tokens（72.3%）**。
-测量环境为 Pi 1.2.0 的独立临时进程、空白工作目录与空白配置。排除内置工具、Skills、上下文文件、会话历史、用户消息、无关扩展、运行时 UI 与 Slash Commands；计入扩展的 `before_agent_start` 注入。Token 是按 `ceil(字符数 / 4)` 计算的固定字符代理估算，并非模型 tokenizer 实际计费值。
-<!-- token-benchmark:benchmark:end -->
-
 ## 版本说明
 
-- Lean 包装层：`2.13.8`
+- Lean 包装层：`2.13.9`
 - 上游依赖锁定为 `@juicesharp/rpiv-todo@2.13.8` 和 `@juicesharp/rpiv-i18n@2.13.8`。
 
 ## 本地开发

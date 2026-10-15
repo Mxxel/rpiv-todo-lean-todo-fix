@@ -50,7 +50,7 @@ Supported actions include `create`, `list`, `get`, `update`, `delete`, and `clea
 
 ## Versions
 
-- Lean wrapper: `2.13.9`
+- Lean wrapper: `2.13.10`
 - Upstream dependencies are pinned to `@juicesharp/rpiv-todo@2.13.8` and `@juicesharp/rpiv-i18n@2.13.8`.
 
 ## Development

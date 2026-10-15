@@ -50,7 +50,7 @@ todo
 
 ## 版本说明
 
-- Lean 包装层：`2.13.9`
+- Lean 包装层：`2.13.10`
 - 上游依赖锁定为 `@juicesharp/rpiv-todo@2.13.8` 和 `@juicesharp/rpiv-i18n@2.13.8`。
 
 ## 本地开发

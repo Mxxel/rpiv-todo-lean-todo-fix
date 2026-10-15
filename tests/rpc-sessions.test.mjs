@@ -169,3 +169,28 @@ test("non-rpc mode delegates cleanly to upstream handler", async () => {
   await pi.emit("session_start", {}, cliCtx);
   // No error thrown and upstream executed
 });
+
+test("appends a host-readable plan snapshot to RPC mutations only", async () => {
+  const pi = createMockPi();
+  extension(pi);
+  const tool = pi.tools.find((t) => t.name === "todo");
+  const signal = new AbortController().signal;
+  const run = (params, ctx) => tool.execute("call", params, signal, () => {}, ctx);
+  const texts = (result) => result.content.map((part) => part.text);
+  const rpcCtx = createRpcCtx("rpc-plan", createMockUi());
+
+  await run({ action: "create", subject: "Read\nfiles" }, rpcCtx);
+  await run({ action: "create", subject: "Edit code" }, rpcCtx);
+  await run({ action: "create", subject: "Dropped" }, rpcCtx);
+  await run({ action: "update", id: 1, status: "completed" }, rpcCtx);
+  await run({ action: "delete", id: 3 }, rpcCtx);
+  const updated = await run({ action: "update", id: 2, status: "in_progress" }, rpcCtx);
+  assert.equal(texts(updated).at(-1), "Plan:\n- [x] Read files\n- [in_progress] Edit code");
+
+  const listed = await run({ action: "list" }, rpcCtx);
+  assert.ok(!texts(listed).some((text) => text.startsWith("Plan:")), "read-only actions add no snapshot");
+
+  const cliCtx = { mode: "interactive", hasUI: false, sessionManager: { getSessionId: () => "cli-plan", getBranch: () => [] } };
+  const cli = await run({ action: "create", subject: "CLI task" }, cliCtx);
+  assert.ok(!texts(cli).some((text) => text.startsWith("Plan:")), "non-RPC output is unchanged");
+});

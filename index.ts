@@ -43,6 +43,22 @@ function prepareTodoArguments(args: unknown): unknown {
 	return input;
 }
 
+const HOST_PLAN_ACTIONS = new Set(["create", "update", "delete"]);
+const HOST_PLAN_MARKS: Record<string, string> = { pending: " ", in_progress: "in_progress", completed: "x" };
+
+// Codex Desktop via codexhost drops custom widgets, but turns a todo tool result's
+// `- [status] step` lines into its native plan panel. Append the full snapshot after
+// mutations in RPC mode only, so TUI output and model tokens stay unchanged there.
+function withHostPlan(result: any, params: unknown, ctx: ExtensionContext): any {
+	if (ctx?.mode !== "rpc" || !HOST_PLAN_ACTIONS.has((params as { action?: string })?.action ?? "")) return result;
+	if (!Array.isArray(result?.content)) return result;
+	const lines = getState(sid(ctx)).tasks
+		.filter((task: any) => task.status in HOST_PLAN_MARKS)
+		.map((task: any) => `- [${HOST_PLAN_MARKS[task.status]}] ${String(task.subject).replace(/\s+/g, " ").trim()}`);
+	if (lines.length === 0) return result;
+	return { ...result, content: [...result.content, { type: "text", text: `Plan:\n${lines.join("\n")}` }] };
+}
+
 function removeSchemaDescriptions(value: unknown, seen = new Set<object>(), isPropertiesMap = false): void {
 	if (value === null || typeof value !== "object" || seen.has(value)) return;
 	seen.add(value);
@@ -307,6 +323,8 @@ export default function (pi: ExtensionAPI): void {
 							promptSnippet: PROMPT_SNIPPET,
 							promptGuidelines: PROMPT_GUIDELINES,
 							prepareArguments: (args) => prepareTodoArguments(tool.prepareArguments?.(args) ?? args) as never,
+							execute: async (toolCallId, params, signal, onUpdate, ctx) =>
+								withHostPlan(await tool.execute(toolCallId, params, signal, onUpdate, ctx), params, ctx),
 						}));
 					}
 					return target.registerTool(decorateWithCollapsedDisplay(tool));

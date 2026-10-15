@@ -16,7 +16,7 @@ With only this extension enabled, its recurring model-facing initialization cont
 
 | Variant | Tool and prompt contribution | Total |
 | --- | --- | ---: |
-| Lean `@ssk_dev/rpiv-todo-lean@2.13.9` | `todo` (250) | **250** |
+| Lean `@ssk_dev/rpiv-todo-lean@2.13.10` | `todo` (250) | **250** |
 | Upstream `@juicesharp/rpiv-todo@2.13.8` | `todo` (904) | **904** |
 
 This saves **654 tokens (72.3%)**.
@@ -28,6 +28,7 @@ Measured with Pi 1.2.0 in separate temporary processes with empty working direct
 * Full task lifecycle: Supports creating, listing, viewing, updating, deleting, and clearing tasks.
 * Dependencies and tracking: Manages status transitions, dependencies, metadata, commands, and replay logs.
 * Concise schema: Keeps the native flat schema while removing repetitive field documentation and wordy prompt guidelines.
+* RPC host plans: In RPC mode, create/update/delete results append a `- [x] step` checklist, so hosts such as codexhost (Codex Desktop) show the native plan panel. Interactive mode output is unchanged.
 
 ## Installation
 

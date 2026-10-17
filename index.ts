@@ -28,7 +28,7 @@ function decorateWithCollapsedDisplay<T extends CollapsedDisplayTool>(tool: T): 
 const TOOL_DESCRIPTION = "Task tracker. action is required: create|update|list|get|delete|clear; create needs subject; update/get/delete need id.";
 const PROMPT_SNIPPET = "";
 const PROMPT_GUIDELINES = [
-	"todo: Use for multi-step tasks. update needs changed fields; list accepts status/includeDeleted; clear removes all; create supports blockedBy; update supports addBlockedBy/removeBlockedBy; keep one in_progress and complete tasks promptly.",
+	"todo: Use for multi-step tasks. update needs changed fields; list accepts status/includeDeleted; clear removes all; create supports blockedBy; update supports addBlockedBy/removeBlockedBy; keep one in_progress. Set in_progress before starting each step and completed the moment it finishes; never batch updates.",
 ];
 
 function prepareTodoArguments(args: unknown): unknown {

@@ -28,7 +28,7 @@ function decorateWithCollapsedDisplay<T extends CollapsedDisplayTool>(tool: T): 
 const TOOL_DESCRIPTION = "Task tracker. action is required: create|update|list|get|delete|clear; create needs subject; update/get/delete need id.";
 const PROMPT_SNIPPET = "";
 const PROMPT_GUIDELINES = [
-	"todo: Use for multi-step tasks. update needs changed fields; list accepts status/includeDeleted; clear removes all; create supports blockedBy; update supports addBlockedBy/removeBlockedBy; keep one in_progress. Set in_progress before starting each step and completed the moment it finishes; never batch updates.",
+	"todo: Use for multi-step tasks. update needs changed fields; list accepts status/includeDeleted; clear removes all; create supports blockedBy; update supports addBlockedBy/removeBlockedBy; keep one in_progress; mark each step completed as it finishes.",
 ];
 
 function prepareTodoArguments(args: unknown): unknown {
@@ -110,7 +110,14 @@ function createRpcSessionOverlay(sessionId: string): TodoOverlay {
 		for (const taskId of this.hiddenCompletedTaskIds) {
 			if (!completedTaskIds.has(taskId)) this.hiddenCompletedTaskIds.delete(taskId);
 		}
-		return { tasks: [...state.tasks], nextId: state.nextId };
+		// Display-only fallback: guarantee a visible current step even if the model never
+		// sets in_progress; store and model-visible output stay untouched.
+		const tasks = state.tasks.map((task: any) => ({ ...task }));
+		if (!tasks.some((task: any) => task.status === "in_progress")) {
+			const current = tasks.find((task: any) => task.status === "pending");
+			if (current) current.status = "in_progress";
+		}
+		return { tasks, nextId: state.nextId };
 	};
 
 	return overlay;
